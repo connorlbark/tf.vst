@@ -5,13 +5,16 @@
 #include "include/cppflow/model.h"
 #include "include/cppflow/tensor.h"
 
+#define MODELPATH "/Users/connorbarker/Desktop/reverb_v4_epoch_20"
+
 ConvModeler::ConvModeler(const InstanceInfo& info) : Plugin(info, MakeConfig(kNumParams, kNumPresets))
 {
-  GetParam(kInGain)->InitDouble("In Gain", 0., 0., 100.0, 0.01, "%");
-  GetParam(kOutGain)->InitDouble("Out Gain", 0., 0., 100.0, 0.01, "%");
-  GetParam(kEnabled)->InitBool("Enabled", true);
+  GetParam(kInGain)->InitDouble("In Gain", 100.0, 0., 100.0, 0.01, "%");
+  GetParam(kOutGain)->InitDouble("Out Gain", 100.0, 0., 100.0, 0.01, "%");
+  GetParam(kEnabled)->InitBool("Enabled", false);
   
-  this->model = std::make_unique<cppflow::model>("resources/model");
+  this->model = std::make_unique<cppflow::model>(MODELPATH);
+  this->memory = std::make_unique<std::deque<sample>>(memory_capacity);
   
 #if IPLUG_EDITOR // http://bit.ly/2S64BDd
   mMakeGraphicsFunc = [&]() {
@@ -38,28 +41,39 @@ void ConvModeler::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
   const bool enabled = GetParam(kEnabled)->Value();
 
   const int nChans = NOutChansConnected();
+  
+  // add new sample inputs to memory
+  for (int s = 0; s < nFrames; s++) {
+      if (memory_capacity >= this->memory->size()) {
+        this->memory->pop_front();
+        this->memory->pop_front();
+
+      }
+    this->memory->push_back(inputs[0][s]);
+    this->memory->push_back(inputs[1][s]);
+  }
 
   if (enabled) {
     const double inGain = GetParam(kInGain)->Value() / 100.;
     
-    for (int s = 0; s < nFrames; s++) {
-      for (int c = 0; c < nChans; c++) {
-        outputs[c][s] = inputs[c][s] * inGain;
-      }
-    }
-    
-    auto input = cppflow::tensor(inputs);
+    auto input = cppflow::tensor(std::vector<float>{this->memory->begin(), this->memory->end()}, std::vector<int64_t>{1,nFrames,2});
     auto output = this->model->operator()(input);
-    auto values = output.get_data<float*>();
-
     
-    
-    const double outGain = GetParam(kInGain)->Value() / 100.;
+    auto data = output.get_data<float>();
+    const double outGain = GetParam(kOutGain)->Value() / 100.;
     for (int s = 0; s < nFrames; s++) {
-      for (int c = 0; c < nChans; c++) {
-        outputs[c][s] = values[c][s] * outGain;
-      }
+      auto l = data[2*s];
+      auto r = data[2*s+1];
+      outputs[0][s] = l * outGain;
+      outputs[1][s] = r * outGain;
     }
+    
+//    
+//    for (int s = 0; s < nFrames; s++) {
+//      for (int c = 0; c < nChans; c++) {
+//        outputs[c][s] = values[c][s] * outGain;
+//      }
+//    }
   } else {
     for (int s = 0; s < nFrames; s++) {
       for (int c = 0; c < nChans; c++) {
