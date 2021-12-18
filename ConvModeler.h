@@ -4,14 +4,12 @@
 #include "include/cppflow/model.h"
 #include <memory>
 
-const int kNumPresets = 3;
-const int memory_capacity = 1024;
+const int kNumPresets = 1;
+const int memory_capacity = 44100;
 
 enum EParams
 {
-  kInGain = 0,
-  kOutGain = 1,
-  kEnabled = 2,
+  kEnabled = 0,
   kNumParams
 };
 

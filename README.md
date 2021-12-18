@@ -1,19 +1,11 @@
 # ConvModeler
-A basic volume control effect plug-in with IGraphics GUI
 
+This plugin allows importing and running TensorFlow SavedModels in a VST3 format.
 
-# tensorflow setup
+## Tensorflow Install
+
+You must have the C Tensorflow 2.7 library installed.
 
 ```bash
-
-git clone ... # get tensorflow
-cd tensorflow
-./configure
-bazel build --config=opt //tensorflow:libtensorflow_cc.so
-
-mkdir /usr/local/include/tf
-cp -r bazel-genfiles/ /usr/local/include/tf/
-cp -r tensorflow /usr/local/include/tf/
-cp -r third_party /usr/local/include/tf/
-cp -r bazel-bin/libtensorflow_cc.so /usr/local/lib/
+brew install libtensorflow
 ```

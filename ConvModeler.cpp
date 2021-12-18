@@ -5,16 +5,16 @@
 #include "include/cppflow/model.h"
 #include "include/cppflow/tensor.h"
 
-#define MODELPATH "/Users/connorbarker/Desktop/reverb_v4_epoch_20"
+#define MODELPATH "/Users/USERNAME/Documents/ConvModeler/Model"
 
 ConvModeler::ConvModeler(const InstanceInfo& info) : Plugin(info, MakeConfig(kNumParams, kNumPresets))
 {
-  GetParam(kInGain)->InitDouble("In Gain", 100.0, 0., 100.0, 0.01, "%");
-  GetParam(kOutGain)->InitDouble("Out Gain", 100.0, 0., 100.0, 0.01, "%");
   GetParam(kEnabled)->InitBool("Enabled", false);
   
   this->model = std::make_unique<cppflow::model>(MODELPATH);
   this->memory = std::make_unique<std::deque<sample>>(memory_capacity);
+  for (int i = 0; i < memory_capacity; i++)
+    this->memory->push_back(0.0);
   
 #if IPLUG_EDITOR // http://bit.ly/2S64BDd
   mMakeGraphicsFunc = [&]() {
@@ -26,9 +26,7 @@ ConvModeler::ConvModeler(const InstanceInfo& info) : Plugin(info, MakeConfig(kNu
     pGraphics->AttachPanelBackground(COLOR_GRAY);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     const IRECT b = pGraphics->GetBounds();
-    pGraphics->AttachControl(new IVRadioButtonControl(b.GetMidVPadded(50), kEnabled));
-    pGraphics->AttachControl(new IVKnobControl(b.GetCentredInside(100).GetVShifted(-50), kInGain));
-    pGraphics->AttachControl(new IVKnobControl(b.GetCentredInside(100).GetVShifted(-150), kOutGain));
+    pGraphics->AttachControl(new IVRadioButtonControl(b.GetCentredInside(100), kEnabled));
 
   };
 #endif
@@ -53,19 +51,18 @@ void ConvModeler::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
     this->memory->push_back(inputs[1][s]);
   }
 
-  if (enabled) {
-    const double inGain = GetParam(kInGain)->Value() / 100.;
+  if (enabled and (nFrames < memory_capacity)) {
     
-    auto input = cppflow::tensor(std::vector<float>{this->memory->begin(), this->memory->end()}, std::vector<int64_t>{1,nFrames,2});
+    auto input = cppflow::tensor(std::vector<float>{this->memory->begin(), this->memory->end()}, std::vector<int64_t>{1,memory_capacity/2 ,2});
     auto output = this->model->operator()(input);
     
     auto data = output.get_data<float>();
-    const double outGain = GetParam(kOutGain)->Value() / 100.;
+    unsigned long startIdx = data.size() - 2 * nFrames;
     for (int s = 0; s < nFrames; s++) {
-      auto l = data[2*s];
-      auto r = data[2*s+1];
-      outputs[0][s] = l * outGain;
-      outputs[1][s] = r * outGain;
+      auto l = data[startIdx+2*s];
+      auto r = data[startIdx+2*s+1];
+      outputs[0][s] = l;
+      outputs[1][s] = r;
     }
     
 //    
