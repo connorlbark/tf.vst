@@ -15,16 +15,16 @@ def  main():
   else:
     demo=int(sys.argv[1])
    
-  installer = "\installer\ConvModeler Installer.exe"
+  installer = "\installer\tf_vst Installer.exe"
    
   if demo:
-    installer = "\installer\ConvModeler Demo Installer.exe"
+    installer = "\installer\tf_vst Demo Installer.exe"
    
   FILES_TO_ZIP = [
     projectpath + installer,
     projectpath + "\installer\changelog.txt",
     projectpath + "\installer\known-issues.txt",
-    projectpath + "\manual\ConvModeler manual.pdf" 
+    projectpath + "\manual\tf_vst manual.pdf" 
   ]
 
   # extract values from config.h
@@ -43,10 +43,10 @@ def  main():
 
   FULLVERSIONSTR = MAJORSTR + "." + MINORSTR + "." + BUGFIXSTR
 
-  ZIPNAME = "ConvModeler-v" + FULLVERSIONSTR + "-win.zip"
+  ZIPNAME = "tf_vst-v" + FULLVERSIONSTR + "-win.zip"
   
   if demo:
-    ZIPNAME = "ConvModeler-v" + FULLVERSIONSTR + "-win-demo.zip"
+    ZIPNAME = "tf_vst-v" + FULLVERSIONSTR + "-win-demo.zip"
   
   zf = zipfile.ZipFile(projectpath + "\installer\/" + ZIPNAME, mode="w")
 

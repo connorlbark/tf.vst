@@ -253,8 +253,8 @@ sudo rm -R -f installer/build-mac/
 
 if [ $DEMO == 1 ]
 then
-git checkout installer/ConvModeler.iss
-git checkout installer/ConvModeler.pkgproj
+git checkout installer/tf_vst.iss
+git checkout installer/tf_vst.pkgproj
 git checkout resources/img/AboutBox.png
 fi
 

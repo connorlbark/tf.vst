@@ -60,9 +60,9 @@ def main():
       line="AppVersion=" + config['FULL_VER_STR'] + "\n"
     if "OutputBaseFilename" in line:
       if demo:
-        line="OutputBaseFilename=ConvModeler Demo Installer\n"
+        line="OutputBaseFilename=tf_vst Demo Installer\n"
       else:
-        line="OutputBaseFilename=ConvModeler Installer\n"
+        line="OutputBaseFilename=tf_vst Installer\n"
         
     if 'Source: "readme' in line:
      if demo:
@@ -72,15 +72,15 @@ def main():
     
     if "WelcomeLabel1" in line:
      if demo:
-       line="WelcomeLabel1=Welcome to the ConvModeler Demo installer\n"
+       line="WelcomeLabel1=Welcome to the tf_vst Demo installer\n"
      else:
-       line="WelcomeLabel1=Welcome to the ConvModeler installer\n"
+       line="WelcomeLabel1=Welcome to the tf_vst installer\n"
        
     if "SetupWindowTitle" in line:
      if demo:
-       line="SetupWindowTitle=ConvModeler Demo installer\n"
+       line="SetupWindowTitle=tf_vst Demo installer\n"
      else:
-       line="SetupWindowTitle=ConvModeler installer\n"
+       line="SetupWindowTitle=tf_vst installer\n"
        
     sys.stdout.write(line)
     
